@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Culture Explorers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --p1-color: #4facfe;
+            --p1-bg: #e0f3ff;
+            --p2-color: #ff0844;
+            --p2-bg: #ffe0e9;
+            --default-font: 'Fredoka One', cursive;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: var(--default-font);
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #ffdfba;
+            color: #333;
+        }
+
+        /* --- Start Screen --- */
+        #start-screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffdfba, #baffc9);
+            z-index: 100;
+        }
+
+        .title {
+            font-size: 8rem;
+            color: #fff;
+            -webkit-text-stroke: 4px #4a2f1d;
+            text-shadow: 6px 6px 0 #4a2f1d, 12px 12px 0 rgba(0,0,0,0.2);
+            text-align: center;
+            margin-bottom: 20px;
+            z-index: 10;
+        }
+
+        /* Globe Emoji Mascot */
+        .globe-mascot {
+            font-size: 8rem;
+            margin-bottom: 20px;
+            z-index: 10;
+            animation: bounce 2s infinite alternate;
+            filter: drop-shadow(0 10px 0 rgba(0,0,0,0.15));
+            font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+        }
+
+        .timer-settings {
+            z-index: 10;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            color: #fff;
+            -webkit-text-stroke: 2px #4a2f1d;
+            text-shadow: 4px 4px 0 #4a2f1d, 6px 6px 0 rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #timer-input {
+            font-size: 2.5rem;
+            width: 120px;
+            text-align: center;
+            border-radius: 15px;
+            border: 5px solid #4a2f1d;
+            background: #ffcc00;
+            color: #fff;
+            -webkit-text-stroke: 2px #4a2f1d;
+            box-shadow: 0 5px 0 #b38f00;
+            outline: none;
+            pointer-events: auto; 
+            user-select: auto;
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+            max-width: 900px;
+        }
+
+        .start-btn {
+            padding: 20px 40px;
+            font-size: 2.5rem;
+            background: #ffb347;
+            color: #fff;
+            border: 6px solid #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 0 #cc8400, 0 15px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+            -webkit-text-stroke: 2px #cc8400;
+        }
+        
+        .start-btn.blue {
+            background: #4facfe;
+            box-shadow: 0 10px 0 #1b73d6, 0 15px 20px rgba(0,0,0,0.2);
+            -webkit-text-stroke: 2px #1b73d6;
+        }
+
+        .start-btn.green {
+            background: #4caf50;
+            box-shadow: 0 10px 0 #2e7d32, 0 15px 20px rgba(0,0,0,0.2);
+            -webkit-text-stroke: 2px #2e7d32;
+        }
+
+        .start-btn:active {
+            transform: translateY(10px);
+            box-shadow: 0 0px 0 transparent, 0 5px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Rectangular Floating Flags */
+        .floating-bg-item {
+            position: absolute;
+            opacity: 0.25;
+            z-index: 1;
+            pointer-events: none;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 4px solid #fff;
+            background: #fff;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(20px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 15px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-15px); }
+        }
+
+        /* --- Game Layout --- */
+        #game-screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #home-btn {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            padding: 10px 25px;
+            font-size: 2rem;
+            background: #ffb347;
+            color: #fff;
+            border: 4px solid #fff;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #cc8400;
+            transition: transform 0.1s;
+            -webkit-text-stroke: 1.5px #cc8400;
+            z-index: 100;
+        }
+        #home-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 0px 0 transparent;
+        }
+
+        #timer-bar {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            padding: 10px 40px;
+            font-size: 2.5rem;
+            border-radius: 30px;
+            border: 5px solid #333;
+            z-index: 50;
+            color: #333;
+            box-shadow: 0 5px 0 #ccc;
+        }
+
+        .split-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .player-side {
+            flex: 1;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        #screen-p1 { background-color: var(--p2-bg); border-right: 4px dashed #ccc; }
+        #screen-p2 { background-color: var(--p1-bg); }
+        
+        .score-box {
+            position: absolute;
+            top: 15px;
+            font-size: 2.5rem;
+            background: rgba(255,255,255,0.8);
+            padding: 10px 30px;
+            border-radius: 30px;
+            border: 5px solid #333;
+            color: #333;
+            z-index: 20;
+            box-shadow: 0 5px 0 #ccc;
+        }
+        #screen-p1 .score-box { right: 160px; left: auto; color: var(--p2-color); }
+        #screen-p2 .score-box { left: 160px; right: auto; color: var(--p1-color); }
+
+        .game-ui {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* G1 UI Positioning */
+        #p1-g1-ui, #p2-g1-ui {
+            justify-content: center;
+            padding-bottom: 80px; 
+        }
+
+        .flag-display {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 8px solid #ffd700;
+            margin-bottom: 30px; 
+            animation: pulse 1s infinite alternate;
+            background: #fff; 
+            display: flex; 
+            align-items: center;
+            justify-content: center; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        .flag-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+
+        .puzzle-word {
+            font-size: 5.5rem; 
+            letter-spacing: 5px; 
+            margin-bottom: 0;
+            color: #fff;
+            -webkit-text-stroke: 3px #333; 
+            text-shadow: 4px 4px 0 #333;
+            padding: 20px 40px; 
+            border-radius: 30px; 
+            border: 8px solid transparent;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s;
+            text-align: center;
+        }
+
+        .g2-word {
+            font-size: 7rem;
+            letter-spacing: 0px; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); z-index: 10; pointer-events: none; 
+            background: rgba(255,255,255,0.85); box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            color: #333; -webkit-text-stroke: 2px #fff; border: 6px solid #fff;
+        }
+
+        .puzzle-word.correct { background-color: #4caf50; border-color: #2e7d32; color: #fff;}
+        .puzzle-word.incorrect { background-color: #f44336; border-color: #c62828; color: #fff;}
+
+        .options-container { 
+            display: flex; 
+            gap: 30px; 
+            position: absolute; 
+            bottom: 40px; 
+        }
+        .letter-btn {
+            width: 120px; 
+            height: 120px; 
+            font-size: 5rem; 
+            border-radius: 25px;
+            border: 6px solid #fff; 
+            background: #ffcc00; 
+            color: #fff; 
+            cursor: pointer;
+            -webkit-text-stroke: 2px #333; 
+            box-shadow: 0 10px 0 #b38f00; 
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        #screen-p2 .letter-btn { background: var(--p1-color); box-shadow: 0 10px 0 #2b80ff; }
+        #screen-p1 .letter-btn { background: var(--p2-color); box-shadow: 0 10px 0 #cc0033; }
+        .letter-btn:active, .letter-btn.pressed { transform: translateY(10px); box-shadow: 0 0px 0 transparent !important; }
+        
+        .floating-options-container {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;
+        }
+        .emoji-btn {
+            position: absolute; 
+            width: 160px; 
+            height: 160px; 
+            background: #fff; border: 6px solid #ffcc00; border-radius: 50%; cursor: pointer;
+            box-shadow: 0 8px 0 #b38f00; display: flex; align-items: center; justify-content: center;
+            transition: background-color 0.2s, border-color 0.2s, transform 0.05s;
+            pointer-events: auto; z-index: 5;
+            overflow: hidden;
+        }
+        .emoji-btn img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+        }
+        #screen-p2 .emoji-btn { border-color: var(--p1-color); box-shadow: 0 8px 0 #2b80ff; }
+        #screen-p1 .emoji-btn { border-color: var(--p2-color); box-shadow: 0 8px 0 #cc0033; }
+        .emoji-btn:active, .emoji-btn.pressed { transform: scale(0.9) !important; box-shadow: 0 0px 0 transparent !important; }
+        .disabled { opacity: 0.5; pointer-events: none; }
+
+
+        /* ================= GAME 3 SPECIFIC CSS ================= */
+        #g3-p1-ui, #g3-p2-ui { justify-content: start; padding-top: 100px; }
+
+        .g3-char-pic {
+            width: 180px; height: 180px; border-radius: 50%; border: 8px solid #fff;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1); margin-bottom: 20px; object-fit: cover;
+        }
+        .g3-char-emoji {
+            font-size: 8rem; display: flex; align-items: center; justify-content: center;
+            background: rgba(255, 255, 255, 0.5);
+            font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+        }
+
+        .g3-customer-speech {
+            font-size: 4rem; color: #fff; -webkit-text-stroke: 1.5px #333; text-shadow: 2px 2px 0 #333;
+            text-align: center; margin-bottom: 40px;
+            background: rgba(0,0,0,0.1); padding: 20px 40px; border-radius: 20px;
+        }
+        #g3-blank {
+            border-bottom: 5px dashed #fff; padding: 0 30px; color: #ffcc00; transition: all 0.3s;
+            display: inline-block; min-width: 200px;
+        }
+        #g3-blank.filled {
+            border-bottom: 5px solid transparent; background: #fff; color: #333; border-radius: 15px; padding: 5px 30px; -webkit-text-stroke: 0; text-shadow: none;
+        }
+        
+        .g3-menu-grid {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 95%; max-width: 600px; transition: opacity 0.3s;
+        }
+        .g3-item-card {
+            background: #fff; border: 5px solid #ffcc00; border-radius: 15px; display: flex; flex-direction: column; 
+            align-items: center; padding: 10px; cursor: pointer; transition: transform 0.1s; width: 130px;
+        }
+        .g3-item-card:active { transform: scale(0.9); }
+        .g3-item-card.selected { border-color: #4caf50; background: #e8f5e9; }
+        .g3-item-card img {
+            width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin-bottom: 5px;
+        }
+        .g3-emoji { font-size: 4rem; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; margin-bottom: 5px; }
+        .g3-label { font-size: 1rem; font-weight: bold; color: #333; text-align: center; line-height: 1.1;}
+
+        #g3-p1-sentence-mode {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        .g3-conveyor-msg {
+            color: #fff; font-size: 3rem; margin-bottom: 30px; -webkit-text-stroke: 1px #333; text-shadow: 2px 2px 0 #333;
+            text-align: center; max-width: 90%;
+        }
+        .g3-build-area {
+            min-height: 110px; width: 90%; max-width: 600px; border: 5px dashed #fff; border-radius: 20px; 
+            margin-bottom: 40px; display: flex; gap: 15px; padding: 20px; flex-wrap: wrap; justify-content: center; 
+            transition: all 0.3s; background: rgba(255,255,255,0.2);
+        }
+        .g3-build-area.correct { background: #4caf50; border-color: #2e7d32; }
+        .g3-build-area.incorrect { background: #f44336; border-color: #c62828; }
+        
+        .g3-word-tray {
+            width: 90%; max-width: 600px; display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;
+        }
+        .g3-word-btn {
+            background: var(--p2-color); border: 4px solid #fff; border-radius: 15px; padding: 15px 30px; 
+            font-size: 2.2rem; color: #fff; cursor: pointer; -webkit-text-stroke: 1px #333; 
+            box-shadow: 0 8px 0 #b38f00; transition: transform 0.1s;
+        }
+        .g3-word-btn:active { transform: translateY(8px); box-shadow: none; }
+
+        #g3-p1-conveyor-mode {
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        .g3-conveyor-container {
+            width: 95%; height: 280px; background: #3e2723; border-radius: 30px; border: 8px solid #1f1209; 
+            position: relative; overflow: hidden; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .g3-belt-line {
+            width: 100%; height: 90px; background: #5d4037; border-top: 5px dashed #3e2723; 
+            border-bottom: 5px dashed #3e2723; position: absolute; top: 50%; transform: translateY(-50%);
+        }
+        #g3-items-area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        
+        .g3-belt-item {
+            position: absolute; left: -140px; cursor: pointer; background: rgba(255,255,255,0.8); 
+            border-radius: 50%; width: 110px; height: 110px; display: flex; align-items: center; justify-content: center;
+            border: 5px solid #ffcc00; box-shadow: 0 8px 10px rgba(0,0,0,0.3); transition: background-color 0.2s, border-color 0.2s;
+            animation: moveRightBelt 3s linear forwards; overflow: hidden;
+            font-size: 4.5rem; font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif; text-align: center;
+        }
+        .g3-belt-item img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+        }
+        .g3-belt-item:active { transform: scale(0.9); }
+        @keyframes moveRightBelt { from { left: -140px; } to { left: 110%; } }
+
+        /* End Screen */
+        #end-screen {
+            display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85); z-index: 200; flex-direction: column;
+            align-items: center; justify-content: center; color: #fff;
+        }
+        .winnerText {
+            font-size: 6rem; color: #ffd700; -webkit-text-stroke: 3px #fff; margin-bottom: 30px; text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1 class="title">Culture<br>Explorers</h1>
+        
+        <div class="globe-mascot">🌍</div>
+
+        <div class="timer-settings">
+            Time: <input type="number" id="timer-input" value="120" min="10" max="300"> sec
+        </div>
+
+        <div class="menu-buttons">
+            <button class="start-btn" onclick="startGame(1)">Spelling Game</button>
+            <button class="start-btn blue" onclick="startGame(2)">Catch the Flag</button>
+            <button class="start-btn green" onclick="startGame(3)">Travel Agency</button>
+        </div>
+    </div>
+
+    <div id="game-screen">
+        <button id="home-btn" onclick="goHome()">🏠 Menu</button>
+        <div id="timer-bar">Time: <span id="time-left">120</span></div>
+        
+        <div class="split-container">
+            <div id="screen-p1" class="player-side">
+                <div class="score-box" id="score-box-p2">P2: <span id="score2">0</span></div>
+                
+                <div id="p2-g1-ui" class="game-ui">
+                    <div class="flag-display" id="flag1"></div>
+                    <div class="puzzle-word" id="word1">_APAN</div>
+                    <div class="options-container" id="options1"></div>
+                </div>
+
+                <div id="p2-g2-ui" class="game-ui" style="display:none;">
+                    <div class="puzzle-word g2-word" id="target-word1">Japan</div>
+                    <div class="floating-options-container" id="floating-options1"></div>
+                </div>
+
+                <div id="g3-p1-ui" class="game-ui" style="display:none;">
+                    <div class="g3-char-emoji g3-char-pic">✈️</div>
+                    
+                    <div id="g3-p1-sentence-mode">
+                        <div class="g3-conveyor-msg" style="margin-top:20px;">Build the question!</div>
+                        <div class="g3-build-area" id="g3-build-area"></div>
+                        <div class="g3-word-tray" id="g3-word-tray"></div>
+                    </div>
+
+                    <div id="g3-p1-conveyor-mode" style="display:none;">
+                        <div class="g3-conveyor-msg" id="g3-conveyor-msg">Waiting for traveler...</div>
+                        <div class="g3-conveyor-container">
+                            <div class="g3-belt-line"></div>
+                            <div id="g3-items-area"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-p2" class="player-side">
+                <div class="score-box" id="score-box-p1">P1: <span id="score1">0</span></div>
+                
+                <div id="p1-g1-ui" class="game-ui">
+                    <div class="flag-display" id="flag2"></div>
+                    <div class="puzzle-word" id="word2">TAIWA_</div>
+                    <div class="options-container" id="options2"></div>
+                </div>
+
+                <div id="p1-g2-ui" class="game-ui" style="display:none;">
+                    <div class="puzzle-word g2-word" id="target-word2">Taiwan</div>
+                    <div class="floating-options-container" id="floating-options2"></div>
+                </div>
+
+                <div id="g3-p2-ui" class="game-ui" style="display:none;">
+                    <div class="g3-char-emoji g3-char-pic">😎</div>
+                    
+                    <div class="g3-customer-speech" id="g3-speech-bubble">
+                        I want to go to <br><span id="g3-blank">______</span>.
+                    </div>
+                    <div class="g3-menu-grid" id="g3-menu">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="end-screen">
+        <div class="winnerText" id="winner-text">Player 1 Wins!</div>
+        <button class="start-btn" onclick="goHome()">Main Menu</button>
+    </div>
+
+    <script>
+        const countries = [
+            { word: 'JAPAN', code: 'jp', nat: 'Japanese' },
+            { word: 'TAIWAN', code: 'tw', nat: 'Taiwanese' },
+            { word: 'SOUTH AFRICA', code: 'za', nat: 'South African' },
+            { word: 'USA', code: 'us', nat: 'American' },
+            { word: 'VIETNAM', code: 'vn', nat: 'Vietnamese' },
+            { word: 'THAILAND', code: 'th', nat: 'Thai' },
+            { word: 'GERMANY', code: 'de', nat: 'German' },
+            { word: 'INDIA', code: 'in', nat: 'Indian' },
+            { word: 'SPAIN', code: 'es', nat: 'Spanish' },
+            { word: 'SOUTH KOREA', code: 'kr', nat: 'South Korean' }
+        ];
+
+        const activities = [
+            { word: 'take pictures', emoji: '📸' },
+            { word: 'enjoy the view', emoji: '⛰️' },
+            { word: 'eat sushi', emoji: '🍣' },
+            { word: 'eat a hamburger', emoji: '🍔' },
+            { word: 'drink bubble milktea', emoji: '🧋' },
+            { word: 'ride a bike', emoji: '🚲' },
+            { word: 'go to the zoo', emoji: '🐘' },
+            { word: 'buy toys', emoji: '🧸' },
+            { word: 'relax', emoji: '🏖️' }
+        ];
+
+        let score1 = 0; let score2 = 0; 
+        let timeLeft = 120;
+        let gameInterval; let currentMode = 1;
+
+        function getFlagUrl(code) {
+            return `https://flagcdn.com/w160/${code}.png`;
+        }
+
+        function toTitleCase(str) {
+            return str.split(' ').map(w => w.charAt(0) + w.slice(1).toLowerCase()).join(' ');
+        }
+
+        const bgFlagCodes = [
+            'jp', 'tw', 'za', 'us', 'vn', 'th', 'de', 'in', 'es', 'kr',
+            'fr', 'it', 'gb', 'ca', 'au', 'br', 'ar', 'mx', 'cn', 'ru',
+            'ph', 'my', 'sg', 'id', 'nz', 'eg', 'ng', 'ke', 'gr', 'tr',
+            'se', 'no', 'fi', 'dk', 'nl', 'be', 'ch', 'at', 'ie', 'pt'
+        ];
+
+        function createRotatingBackground() {
+            const startScreen = document.getElementById('start-screen');
+            let shuffledCodes = [...bgFlagCodes].sort(() => Math.random() - 0.5);
+            
+            for(let i = 0; i < shuffledCodes.length; i++) {
+                let el = document.createElement('img');
+                el.className = 'floating-bg-item';
+                el.src = getFlagUrl(shuffledCodes[i]);
+                
+                let height = (Math.random() * 60 + 80); 
+                let width = height * 1.5; 
+                el.style.width = width + 'px';
+                el.style.height = height + 'px';
+                
+                el.style.left = (Math.random() * 100) + 'vw';
+                el.style.top = (Math.random() * 100) + 'vh';
+                
+                el.style.animation = `drift ${(Math.random() * 10 + 8)}s ease-in-out infinite alternate`;
+                el.style.animationDelay = '-' + (Math.random() * 5) + 's';
+                startScreen.appendChild(el);
+            }
+        }
+        createRotatingBackground();
+
+        function startGame(mode) {
+            currentMode = mode;
+            let inputTime = parseInt(document.getElementById('timer-input').value);
+            timeLeft = (isNaN(inputTime) || inputTime <= 0) ? 120 : inputTime;
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            
+            if (mode === 3) {
+                document.getElementById('timer-bar').style.display = 'none'; 
+                document.getElementById('score-box-p1').style.display = 'none';
+                document.getElementById('score-box-p2').style.display = 'none';
+                timeLeft = null; 
+            } else {
+                document.getElementById('timer-bar').style.display = 'block';
+                document.getElementById('score-box-p1').style.display = 'block';
+                document.getElementById('score-box-p2').style.display = 'block';
+                document.getElementById('time-left').innerText = timeLeft; 
+            }
+            
+            document.getElementById('p1-g1-ui').style.display = mode === 1 ? 'flex' : 'none';
+            document.getElementById('p2-g1-ui').style.display = mode === 1 ? 'flex' : 'none';
+            document.getElementById('p1-g2-ui').style.display = mode === 2 ? 'flex' : 'none';
+            document.getElementById('p2-g2-ui').style.display = mode === 2 ? 'flex' : 'none';
+            document.getElementById('g3-p1-ui').style.display = mode === 3 ? 'flex' : 'none';
+            document.getElementById('g3-p2-ui').style.display = mode === 3 ? 'flex' : 'none';
+            
+            if (mode === 1) { generateG1(1); generateG1(2); } 
+            else if (mode === 2) { generateG2(1); generateG2(2); }
+            else if (mode === 3) { generateG3(); }
+            
+            if (timeLeft !== null) {
+                gameInterval = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('time-left').innerText = timeLeft;
+                    if(timeLeft <= 0) endGame();
+                }, 1000);
+            }
+        }
+
+        // ================= GAME 1 LOGIC =================
+        function generateG1(pNum) {
+            const currentCountry = countries[Math.floor(Math.random() * countries.length)];
+            
+            let currentScreen = (pNum === 1) ? document.getElementById('screen-p1') : document.getElementById('screen-p2');
+            let flagEl = currentScreen.querySelector('.flag-display');
+            let wordEl = currentScreen.querySelector('.puzzle-word');
+            let optionsContainer = currentScreen.querySelector('.options-container');
+
+            flagEl.innerHTML = `<img src="${getFlagUrl(currentCountry.code)}" alt="Flag">`;
+            
+            const wordArr = currentCountry.word.split('');
+            let missingIndex;
+            do {
+                missingIndex = Math.floor(Math.random() * wordArr.length);
+            } while (wordArr[missingIndex] === ' ');
+            
+            const correctLetter = wordArr[missingIndex];
+            wordArr[missingIndex] = '_';
+            
+            wordEl.innerText = wordArr.join('');
+            wordEl.className = 'puzzle-word'; 
+            wordEl.style.transform = 'translate(0, 0)';
+
+            const options = getLetterOptions(correctLetter);
+            optionsContainer.innerHTML = ''; 
+
+            let isLocked = false; 
+            options.forEach(letter => {
+                let btn = document.createElement('button');
+                btn.className = 'letter-btn'; btn.innerText = letter;
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault(); if (isLocked) return;
+                    isLocked = true; btn.classList.add('pressed');
+                    const guessedArr = currentCountry.word.split('');
+                    guessedArr[missingIndex] = letter;
+                    handleAnswerG1(pNum, letter, correctLetter, guessedArr.join(''), wordEl, optionsContainer);
+                });
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function getLetterOptions(correct) {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; let letters = [correct];
+            while(letters.length < 3) {
+                let rand = alphabet[Math.floor(Math.random() * alphabet.length)];
+                if(!letters.includes(rand)) letters.push(rand);
+            }
+            return letters.sort(() => Math.random() - 0.5);
+        }
+
+        function handleAnswerG1(pNum, selected, correct, guessedWord, wordEl, container) {
+            wordEl.innerText = guessedWord;
+            Array.from(container.children).forEach(child => child.classList.add('disabled'));
+            if(selected === correct) {
+                if(pNum === 1) score2++; else score1++;
+                wordEl.classList.add('correct');
+            } else {
+                if(pNum === 1) score2--; else score1--;
+                wordEl.classList.add('incorrect'); shakeElement(wordEl);
+            }
+            updateScore(pNum); setTimeout(() => generateG1(pNum), 1500);
+        }
+
+        // ================= GAME 2 LOGIC =================
+        let g2Physics = { 1: [], 2: [] }; let g2AnimFrames = { 1: null, 2: null };
+        function generateG2(pNum) {
+            const currentCountry = countries[Math.floor(Math.random() * countries.length)];
+            
+            let currentScreen = (pNum === 1) ? document.getElementById('screen-p1') : document.getElementById('screen-p2');
+            let wordEl = currentScreen.querySelector('.puzzle-word.g2-word');
+            let container = currentScreen.querySelector('.floating-options-container');
+
+            wordEl.innerText = toTitleCase(currentCountry.word);
+            wordEl.className = 'puzzle-word g2-word'; 
+            wordEl.style.transform = 'translate(-50%, -50%)';
+
+            let flagOptions = [currentCountry.code];
+            const allGameCodes = countries.map(c => c.code);
+            while(flagOptions.length < 5) {
+                let randCode = allGameCodes[Math.floor(Math.random() * allGameCodes.length)];
+                if(!flagOptions.includes(randCode) && randCode !== currentCountry.code) {
+                    flagOptions.push(randCode);
+                }
+            }
+            flagOptions.sort(() => Math.random() - 0.5);
+
+            container.innerHTML = ''; 
+            if(g2AnimFrames[pNum]) cancelAnimationFrame(g2AnimFrames[pNum]);
+            g2Physics[pNum] = [];
+
+            let isLocked = false;
+            let cWidth = container.clientWidth || (window.innerWidth / 2);
+            let cHeight = container.clientHeight || window.innerHeight;
+            let btnSize = 160;
+            let minX = 0; let maxX = cWidth - btnSize;
+            let minY = 100; let maxY = cHeight - btnSize;
+
+            flagOptions.forEach(code => {
+                let btn = document.createElement('button');
+                btn.className = 'emoji-btn'; 
+                btn.innerHTML = `<img src="${getFlagUrl(code)}" alt="Flag">`;
+                
+                let startX = Math.random() * (maxX - minX) + minX;
+                let startY = Math.random() * (maxY - minY) + minY;
+                btn.style.left = startX + 'px'; btn.style.top = startY + 'px';
+
+                let speedX = (Math.random() * 5 + 3) * (Math.random() > 0.5 ? 1 : -1);
+                let speedY = (Math.random() * 5 + 3) * (Math.random() > 0.5 ? 1 : -1);
+
+                g2Physics[pNum].push({ el: btn, x: startX, y: startY, dx: speedX, dy: speedY });
+                
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault(); if (isLocked) return;
+                    isLocked = true; btn.classList.add('pressed');
+                    handleAnswerG2(pNum, code, currentCountry.code, wordEl, container, btn);
+                });
+                container.appendChild(btn);
+            });
+
+            function bounceLoop() {
+                cWidth = container.clientWidth; cHeight = container.clientHeight;
+                maxX = cWidth - btnSize; maxY = cHeight - btnSize;
+                g2Physics[pNum].forEach(p => {
+                    p.x += p.dx; p.y += p.dy;
+                    if (p.x <= minX) { p.x = minX; p.dx *= -1; }
+                    if (p.x >= maxX) { p.x = maxX; p.dx *= -1; }
+                    if (p.y <= minY) { p.y = minY; p.dy *= -1; }
+                    if (p.y >= maxY) { p.y = maxY; p.dy *= -1; }
+                    p.el.style.left = p.x + 'px'; p.el.style.top = p.y + 'px';
+                });
+                g2AnimFrames[pNum] = requestAnimationFrame(bounceLoop);
+            }
+            bounceLoop();
+        }
+
+        function handleAnswerG2(pNum, selected, correct, wordEl, container, clickedBtn) {
+            cancelAnimationFrame(g2AnimFrames[pNum]);
+            Array.from(container.children).forEach(child => child.classList.add('disabled'));
+            if(selected === correct) {
+                if(pNum === 1) score2++; else score1++;
+                wordEl.classList.add('correct');
+                clickedBtn.style.backgroundColor = '#4caf50'; clickedBtn.style.borderColor = '#2e7d32';
+            } else {
+                if(pNum === 1) score2--; else score1--;
+                wordEl.classList.add('incorrect');
+                clickedBtn.style.backgroundColor = '#f44336'; clickedBtn.style.borderColor = '#c62828';
+                shakeElementG2Center(wordEl);
+            }
+            updateScore(pNum); setTimeout(() => generateG2(pNum), 1500);
+        }
+        function shakeElementG2Center(el) {
+            el.style.transform = "translate(calc(-50% + 10px), -50%)";
+            setTimeout(() => {
+                el.style.transform = "translate(calc(-50% - 10px), -50%)";
+                setTimeout(() => el.style.transform = "translate(-50%, -50%)", 100);
+            }, 100);
+        }
+
+        // ================= GAME 3 LOGIC (Travel Agency Multi-Phase) =================
+        let g3SentenceTarget = [];
+        let g3Order = null;
+        let g3OrderActivity = null;
+        let g3BeltInterval = null;
+        let g3Phase = 1; // 1: Country, 2: Activity
+        let g3SelectedCountry = null;
+
+        function generateG3() {
+            g3Phase = 1;
+            g3Order = null;
+            g3OrderActivity = null;
+            g3SelectedCountry = null;
+            if(g3BeltInterval) clearInterval(g3BeltInterval);
+            
+            g3SentenceTarget = ['Where', 'do', 'you', 'want', 'to', 'go', '?'];
+            
+            document.getElementById('g3-speech-bubble').innerHTML = `I want to go to <br><span id="g3-blank">______</span>.`;
+            document.getElementById('g3-blank').classList.remove('filled');
+            drawG3Menu(false); 
+
+            document.getElementById('g3-p1-sentence-mode').style.display = 'flex';
+            document.getElementById('g3-p1-conveyor-mode').style.display = 'none';
+            drawG3SentenceBuilder();
+        }
+
+        function startG3Phase2() {
+            g3Phase = 2;
+            g3OrderActivity = null;
+            if(g3BeltInterval) clearInterval(g3BeltInterval);
+            
+            let countryName = toTitleCase(g3SelectedCountry.word);
+            g3SentenceTarget = ['What', 'will', 'you', 'do', 'in', countryName, '?'];
+
+            document.getElementById('g3-speech-bubble').innerHTML = `I will <br><span id="g3-blank">______</span>.`;
+            document.getElementById('g3-blank').classList.remove('filled');
+            
+            drawG3Menu(false); 
+
+            document.getElementById('g3-p1-sentence-mode').style.display = 'flex';
+            document.getElementById('g3-p1-conveyor-mode').style.display = 'none';
+            drawG3SentenceBuilder();
+        }
+
+        function drawG3Menu(isActive) {
+            let menu = document.getElementById('g3-menu');
+            menu.innerHTML = '';
+            menu.style.opacity = isActive ? '1' : '0.5';
+            menu.style.pointerEvents = isActive ? 'auto' : 'none';
+
+            let dataList = g3Phase === 1 ? countries : activities;
+
+            dataList.forEach(item => {
+                let card = document.createElement('div');
+                card.className = 'g3-item-card';
+                
+                let displayText = g3Phase === 1 ? toTitleCase(item.word) : item.word.toLowerCase();
+
+                if (g3Phase === 1) {
+                    card.innerHTML = `<img src="${getFlagUrl(item.code)}"><div class="g3-label">${displayText}</div>`;
+                } else {
+                    card.innerHTML = `<div class="g3-emoji">${item.emoji}</div><div class="g3-label">${displayText}</div>`;
+                }
+                
+                card.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if(!isActive) return; 
+                    if(g3Phase === 1 && g3Order) return;
+                    if(g3Phase === 2 && g3OrderActivity) return;
+
+                    if (g3Phase === 1) {
+                        g3Order = item;
+                    } else {
+                        g3OrderActivity = item;
+                    }
+                    
+                    document.getElementById('g3-blank').innerText = displayText;
+                    document.getElementById('g3-blank').classList.add('filled');
+                    card.classList.add('selected');
+                    
+                    startG3Belt();
+                });
+                menu.appendChild(card);
+            });
+        }
+
+        function drawG3SentenceBuilder() {
+            let tray = document.getElementById('g3-word-tray');
+            let build = document.getElementById('g3-build-area');
+            tray.innerHTML = ''; build.innerHTML = '';
+
+            let shuffled = [...g3SentenceTarget].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(word => {
+                let btn = document.createElement('button');
+                btn.className = 'g3-word-btn';
+                btn.innerText = word;
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if (btn.parentElement === tray) {
+                        build.appendChild(btn);
+                        checkG3Sentence();
+                    } else {
+                        tray.appendChild(btn);
+                    }
+                });
+                tray.appendChild(btn);
+            });
+        }
+
+        function checkG3Sentence() {
+            let build = document.getElementById('g3-build-area');
+            let currentWords = Array.from(build.children).map(b => b.innerText);
+            
+            if (currentWords.length === g3SentenceTarget.length) {
+                let isCorrect = currentWords.every((w, i) => w === g3SentenceTarget[i]);
+                
+                if (isCorrect) {
+                    build.classList.add('correct');
+                    
+                    setTimeout(() => {
+                        build.classList.remove('correct');
+                        document.getElementById('g3-p1-sentence-mode').style.display = 'none';
+                        document.getElementById('g3-p1-conveyor-mode').style.display = 'flex';
+                        
+                        let waitMsg = g3Phase === 1 ? "Waiting for traveler..." : "Waiting for activity...";
+                        document.getElementById('g3-conveyor-msg').innerText = waitMsg;
+                        
+                        drawG3Menu(true); 
+                    }, 1000);
+                } else {
+                    build.classList.add('incorrect');
+                    shakeElement(build);
+                    setTimeout(() => {
+                        build.classList.remove('incorrect');
+                        drawG3SentenceBuilder(); 
+                    }, 800);
+                }
+            }
+        }
+
+        function startG3Belt() {
+            if (g3Phase === 1) {
+                document.getElementById('g3-conveyor-msg').innerText = `Agency! Catch: ${toTitleCase(g3Order.word)}`;
+            } else {
+                document.getElementById('g3-conveyor-msg').innerText = `Agency! Catch: ${g3OrderActivity.word.toLowerCase()}`;
+            }
+            
+            let itemsArea = document.getElementById('g3-items-area');
+            itemsArea.innerHTML = '';
+            let beltActive = true;
+
+            let dataList = g3Phase === 1 ? countries : activities;
+            let targetItem = g3Phase === 1 ? g3Order : g3OrderActivity;
+
+            g3BeltInterval = setInterval(() => {
+                if(!beltActive) return;
+
+                let isTarget = Math.random() > 0.5;
+                let spawnedObj = isTarget ? targetItem : dataList[Math.floor(Math.random() * dataList.length)];
+                
+                let item = document.createElement('div');
+                item.className = 'g3-belt-item';
+                
+                if (g3Phase === 1) {
+                    item.innerHTML = `<img src="${getFlagUrl(spawnedObj.code)}" alt="Flag">`;
+                } else {
+                    item.innerText = spawnedObj.emoji;
+                }
+                
+                item.style.top = Math.random() * 80 + 30 + 'px'; 
+                
+                item.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    if(!beltActive) return;
+
+                    if(spawnedObj.word === targetItem.word) {
+                        beltActive = false; 
+                        clearInterval(g3BeltInterval);
+                        
+                        item.style.backgroundColor = '#4caf50'; item.style.borderColor = '#2e7d32';
+                        item.style.animationPlayState = 'paused';
+
+                        let rect = item.getBoundingClientRect();
+                        let targetRect = document.getElementById('g3-blank').getBoundingClientRect();
+                        
+                        if (g3Phase === 1) {
+                            g3SelectedCountry = targetItem;
+                            flyAnimationSwapped(getFlagUrl(spawnedObj.code), true, rect.left, rect.top, targetRect.left, targetRect.top);
+                            setTimeout(() => startG3Phase2(), 1200);
+                        } else {
+                            flyAnimationSwapped(spawnedObj.emoji, false, rect.left, rect.top, targetRect.left, targetRect.top);
+                            setTimeout(() => generateG3(), 1200); 
+                        }
+                    } else {
+                        item.style.backgroundColor = '#f44336'; item.style.borderColor = '#c62828';
+                        shakeElement(item);
+                    }
+                });
+                itemsArea.appendChild(item);
+                setTimeout(() => { if(item.parentElement) item.remove(); }, 3000); 
+                
+            }, 1000); 
+        }
+
+        function flyAnimationSwapped(content, isImage, startX, startY, targetX, targetY) {
+            let flyEl;
+            
+            if (isImage) {
+                flyEl = document.createElement('img');
+                flyEl.src = content;
+                flyEl.style.width = '140px';
+                flyEl.style.height = '140px';
+                flyEl.style.borderRadius = '50%';
+                flyEl.style.objectFit = 'cover';
+                flyEl.style.border = '6px solid #ffd700';
+            } else {
+                flyEl = document.createElement('div');
+                flyEl.innerText = content;
+                flyEl.style.fontSize = '8rem';
+                flyEl.style.fontFamily = "'Apple Color Emoji', 'Segoe UI Emoji', sans-serif";
+                flyEl.style.display = 'flex';
+                flyEl.style.alignItems = 'center';
+                flyEl.style.justifyContent = 'center';
+            }
+
+            flyEl.style.position = 'fixed';
+            flyEl.style.left = startX + 'px';
+            flyEl.style.top = startY + 'px';
+            flyEl.style.zIndex = 1000;
+            flyEl.style.transition = 'all 1.1s cubic-bezier(0.25, 1, 0.5, 1)'; 
+            
+            document.body.appendChild(flyEl);
+            flyEl.getBoundingClientRect(); 
+            
+            flyEl.style.left = targetX + 'px';
+            flyEl.style.top = targetY + 'px';
+            flyEl.style.transform = 'scale(1.5) rotate(360deg)';
+            
+            setTimeout(() => flyEl.remove(), 1100);
+        }
+
+        // ================= SHARED UTILS =================
+        function updateScore(pNum) { 
+            if(pNum === 1) document.querySelector('#screen-p1 .score-box span').innerText = score2;
+            else document.querySelector('#screen-p2 .score-box span').innerText = score1;
+        }
+        
+        function shakeElement(el) {
+            el.style.transform = "translateX(10px)";
+            setTimeout(() => {
+                el.style.transform = "translateX(-10px)";
+                setTimeout(() => el.style.transform = "translate(0, 0)", 100);
+            }, 100);
+        }
+
+        function goHome() {
+            clearInterval(gameInterval);
+            if(g3BeltInterval) clearInterval(g3BeltInterval);
+            cancelAnimationFrame(g2AnimFrames[1]); 
+            cancelAnimationFrame(g2AnimFrames[2]);
+
+            score1 = 0; 
+            score2 = 0;
+            updateScore(1); 
+            updateScore(2);
+
+            document.getElementById('g3-items-area').innerHTML = '';
+            document.getElementById('floating-options1').innerHTML = '';
+            document.getElementById('floating-options2').innerHTML = '';
+
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            if(g3BeltInterval) clearInterval(g3BeltInterval);
+            cancelAnimationFrame(g2AnimFrames[1]); cancelAnimationFrame(g2AnimFrames[2]);
+
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('end-screen').style.display = 'flex';
+
+            let wintxt = "";
+            if(score1 > score2) wintxt = "Player 1 Wins!";
+            else if(score2 > score1) wintxt = "Player 2 Wins!";
+            else wintxt = "It's a Tie!";
+            document.getElementById('winner-text').innerText = wintxt;
+        }
+    </script>
+</body>
+</html>
